@@ -16,6 +16,8 @@ class Nepremicnine():
         self.tip = tip
         self.kvadratura = kvadratura
         self.cena = cena
+        self.vrsta_nepremicnine = None
+        self.obmocje = None 
 
     def __str__(self):
         """
@@ -28,7 +30,7 @@ class Nepremicnine():
         Funkcija vrne opis nepremičnine (objekta), ki je primeren za razhroščevanje, shranjevanje 
         in ponovno ustvarjanje objekta.
         """
-        return f"Nepremicnine(lokacija='{self.lokacija}', tip='{self.tip}', kvadratura={self.kvadratura} m², cena={self.cena:.2f} €)"
+        return f"Nepremicnine(lokacija='{self.lokacija}', tip='{self.tip}', kvadratura={self.kvadratura}, cena={self.cena:.2f})"
 
     def pretvori_v_slovar(self):
         '''
@@ -36,7 +38,7 @@ class Nepremicnine():
         '''
         return {"lokacija": self.lokacija, "tip nepremičnine": self.tip, "kvadratura": self.kvadratura, "cena": self.cena}
     
-    
+print("Razred je narejen.")   
     
 def izlusci_podatke(html):
     """
@@ -68,7 +70,7 @@ def izlusci_podatke(html):
     
     return Nepremicnine(lokacija, tip, kvadratura, cena)
 
-
+print("Podatki so izluščeni.")
 
 def izlusci_oglase(vsebina):
     """ 
@@ -89,28 +91,64 @@ def izlusci_oglase(vsebina):
     return nepremicnine
 
 
+def pridobi_podatke_iz_datoteke(datoteka):
+    """
+    Funkcija prebere in izpiše podatke iz ene same html datoteke.
+    """
+    with open(datoteka, "r", encoding='utf-8') as f:
+        vsebina = f.read()
+        najdene_nepremicnine = izlusci_oglase(vsebina)
+        return najdene_nepremicnine
 
-def vsi_oglasi_nepremicnin(path):
-    '''
-    Funkcija pobere vse podatke iz naših html datotek.
-    '''
-    # seznam, ki hrani vse nepremicnine
+def vsi_oglasi_nepremicnin(mapa):
+    """
+    Funkcija pridobi vse podatke iz vseh html datotek v mapi.
+    """
     nepremicnine = []
-    for i in range(1, 16):
-        if i == 1:
-            while os.path.exists(path + ".html"):
-                with open(path + ".html", "r", encoding='utf-8') as file_in:
-                    vsebina = file_in.read()
-                    najdene_nepremicnine = izlusci_oglase(vsebina)  
-        else:       
-            # postopek ponavljamo dokler imamo datoteke
-            while os.path.exists(path + '/' + str(i) + '.html'):
-                with open(path + '/' + str(i) + '.html', "r", encoding='utf-8') as file_in:
-                    vsebina = file_in.read()
-                    najdene_nepremicnine = izlusci_oglase(vsebina)
-        nepremicnine.extend(najdene_nepremicnine)
+    for datoteka in os.listdir(mapa):
+        if datoteka.endswith(".html"):
+            pot_do_datoteke = os.path.join(mapa, datoteka)
+            try:
+                nepremicnine.extend(pridobi_podatke_iz_datoteke(pot_do_datoteke))
+            except FileNotFoundError:
+                print(f"Datoteka {pot_do_datoteke} ni najdena.")
+            except Exception as e:
+                print(f"Napaka pri obdelavi datoteke {pot_do_datoteke}: {e}")
     return nepremicnine
+            
 
+def write_csv(fieldnames, rows, directory, filename):
+    """
+    Funkcija v csv datoteko, ki se nahaja "directory"/"filename" zapiše
+    vrednosti v parametru "rows" pripadajoče ključem podanim v "fieldnames"
+    """
+    os.makedirs(directory, exist_ok=True)
+    path = os.path.join(directory, filename)
+    with open(path, 'w', encoding='utf-8') as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow(row)
+    return
 
+def pripravi_podatke_za_csv():
+    '''
+    Funkcija
+    '''
+    vrsta_nepremicnin = ["stanovanje", "hisa"]
+    obmocja = ["ljubljana-mesto", "ljubljana-okolica", "posavje", "koroska"]
+    vsi_podatki = []
+    for obmocje in obmocja:
+        for vrsta_nepremicnine in vrsta_nepremicnin:
+            oglasi = vsi_oglasi_nepremicnin("podatki/" + obmocje + "/" + vrsta_nepremicnine)
 
-
+            for oglas in oglasi:
+                oglas.vrsta_nepremicnine = vrsta_nepremicnine
+                oglas.obmocje = obmocje         
+                vsi_podatki.extend(oglasi)
+                return vsi_podatki
+vsi_podatki = pripravi_podatke_za_csv()
+    
+                
+fieldnames = ["LOKACIJA NEPREMIČNINE", "TIP NEPREMIČNINE", "KVADRATURA NEPREMIČNINE", "CENA NEPREMIČNINE"]
+write_csv(fieldnames, vsi_podatki, "koncni_podatki", "nepremicnine.csv")
