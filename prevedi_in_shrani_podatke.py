@@ -1,6 +1,5 @@
 import requests
  # ENOSTAVNEJŠA OD URLLIB; pošlje zahteve (z requests) na spletni strežnik, ki vsebuje spletno stran na url
-import re # za uporabo regularnih izrazov
 import os 
 
 print("Skripta se je začela izvajati.")
@@ -72,5 +71,3 @@ nepremicnine = ["stanovanje", "hisa"]
 lokacije = ["ljubljana-mesto", "ljubljana-okolica", "posavje", "koroska"]
    
 shrani_stran_v_datoteko(url, nepremicnine, lokacije)
- 
-# /Users/zalag/Desktop/UVP_projektna_naloga_Gregorc/prevedi_in_shrani_podatke.py
