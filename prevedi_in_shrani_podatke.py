@@ -1,6 +1,6 @@
 import requests # za pošiljanje zahtevkov in prejemanje odgovorov s spletnih strežnikov 
 import os # za ustvarjanje ali popravljanje map/datotek
-import re # za regularne izraze
+import re # za delo z regularnimi izraze
 
 
 def prevedi_v_niz(url):
@@ -87,7 +87,7 @@ def vsi_linki_knjig(mapa):
 
 def shrani_stran_knjige(url, mapa, ime_datoteke):
     """
-    Funkcija shrani html zapise v datoteko "ime_datoteke", katero najdemo v mapi z imenom "mapa". 
+    Funkcija shrani html zapise v datoteko "ime_datoteke", katero najdemo v mapi z naslovom "mapa". 
     """
     besedilo = prevedi_v_niz(url)
     if besedilo:
@@ -99,11 +99,13 @@ def shrani_stran_knjige(url, mapa, ime_datoteke):
 
 def main():
     url = "https://beletrina.si"
-    linki = vsi_linki_knjig("podatki/roman")
-    for link in linki:
-        novi_url = url + link
-        print(f"Pridobivam: {novi_url}")
-        shrani_stran_knjige(novi_url, "podatki/roman/knjige", f"{link.split('/')[-1]}.html")
+    zvrsti = ["roman", "poezija"]
+    for zvrst in zvrsti:
+        linki = vsi_linki_knjig(f"podatki/{zvrst}")
+        for link in linki:
+            novi_url = url + link
+            print(f"Pridobivam: {novi_url}")
+            shrani_stran_knjige(novi_url, f"podatki/{zvrst}/knjige", f"{link.split('/')[-1]}.html")
 
 
 if __name__ == "__main__":
