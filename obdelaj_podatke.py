@@ -2,10 +2,11 @@ import re
 import os
 import csv # za branje in pisanje CSV datotek
 
+
 class Knjige():
     """ 
-    Razred Knjige predstavlja eno knjigo, ki se prodaja. Z atributi naslov knjige, avtor knjige, 
-    število strani (dolžina) in opis pisatelja.
+    Razred Knjige predstavlja eno knjigo. Z atributi naslov knjige (niz), avtor knjige (niz), 
+    število strani - dolžina knjige (celo število) in opis pisatelja (niz).
     """
 
     def __init__(self, naslov, avtor, dolzina, o_pisatelju):
@@ -60,12 +61,14 @@ def izlusci_podatke(html):
     # 3. ŠTEVILO STRANI
     dolzina_vzorec = r"<dt>Št\. strani<\/dt>\s*<dd>(\d+)<\/dd>"
     dolzina = re.search(dolzina_vzorec, html, flags=re.DOTALL)
-    dolzina = dolzina.group(1) if dolzina else None
+    dolzina = int(dolzina.group(1)) if dolzina else None
     
-    # 4. VSEBINA KNJIGE
+    # 4. O PISATELJU
     o_pisatelju_vzorec = r'<div class="w-full md:w-1\/2 xl:w-8\/12">\s*<p>(.*?)<\/p>\s*?'
     o_pisatelju = re.search(o_pisatelju_vzorec, html, flags=re.DOTALL)
     o_pisatelju = o_pisatelju.group(1).replace('"', '').replace('&ndash', '-').strip() if o_pisatelju else None
+    
+    # Če kateregakoli podatka pusti prazno.
     
     return Knjige(naslov, avtor, dolzina, o_pisatelju)
 
@@ -102,8 +105,8 @@ def vsi_podatki_o_knjigah(mapa):
 
 def write_csv(fieldnames, rows, directory, filename):
     """
-    Funkcija v csv datoteko, ki se nahaja "directory"/"filename" zapiše
-    vrednosti v parametru "rows" pripadajoče ključem podanim v "fieldnames"
+    Funkcija v CSV datoteko, ki se nahaja v mapi "directory" z imenom "filename",
+    zapiše vrednosti iz parametra "rows", ki pripadajo ključem podanim v "fieldnames".
     """
     os.makedirs(directory, exist_ok=True)
     path = os.path.join(directory, filename)
@@ -116,6 +119,9 @@ def write_csv(fieldnames, rows, directory, filename):
 
 
 def pripravi_podatke_za_csv():
+    """
+    Funkcija pripravi podatke za zapis CSV datoteke in jih shrani v seznam, ki ga vrne.
+    """
     vsi_podatki = []
     zvrsti = ["roman", "poezija"]
     for zvrst in zvrsti:
@@ -127,6 +133,8 @@ def pripravi_podatke_za_csv():
     return vsi_podatki
     
     
-vsi_podatki = pripravi_podatke_za_csv()            
+vsi_podatki = pripravi_podatke_za_csv()    
+# Napišemo seznam imen stolpcev v CSV datoteki.        
 fieldnames = ["naslov", "avtor", "dolzina", "zvrst", "o_pisatelju"]
+# Ustvarimo tabelo.
 write_csv(fieldnames, vsi_podatki, "koncni_podatki", "podatki_o_knjigi.csv")
