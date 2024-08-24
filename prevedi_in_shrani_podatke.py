@@ -5,13 +5,14 @@ import re # za delo z regularnimi izraze
 
 def prevedi_v_niz(url):
     """
-    Funkcija sprejme niz in poskusi vrniti vsebino te spletne strani kot niz, če je to mogoče,
+    Funkcija sprejme niz in poskusi vrniti vsebino spletne strani kot niz, če je to mogoče,
     sicer nam o napaki poroča.
     """
     # Try sproži oziroma pokaže napako, če je ta prisotna.
     try:
         # vsebino spletne strani (HTML) shranimo v spremenljivko vsebina
         vsebina = requests.get(url).text
+        
     # Če pride do napake pri pošiljanju zahtevka ali pridobivanju vsebine (npr. spletna stran ne obstaja), 
     # nam to sporoči - "Prišlo je do napake!". 
     except requests.exceptions.RequestException:
@@ -25,34 +26,58 @@ def prevedi_v_niz(url):
 
 def shrani_v_datoteko(besedilo, mapa, datoteka):
     """ 
-    Funkcija shrani vsebino (besedilo) v željeno datoteko "datoteka", ki se nahaja v mapi "mapa" 
-    (v resnici poda pot do datoteke). Funkcija vrne False, če pride do napake.
+    Funkcija shrani vsebino (besedilo) v novo datoteko "datoteka", ki se nahaja v mapi "mapa" 
+    (v resnici poda pot do datoteke). Če datoteka že obstaja jo povozi. Funkcija vrne False, če pride do napake.
     """
     try:
-        # Ustvarimo mapo, če ta še ne obstaja. Drugi argument prepreči, 
-        # da bi prišlo do napake v primeru ko mapa že obstaja.
+        # Ustvarimo mapo, če ta še ne obstaja. Drugi argument prepreči, da bi prišlo do napake v primeru ko mapa že obstaja.
         os.makedirs(mapa, exist_ok=True)
-        # path nam pove, kje lahko našo datoteko najdemo ("polno pot do datoteke")
+        # Path nam pove, kje lahko našo datoteko najdemo ("polno pot do datoteke").
         path = os.path.join(mapa, datoteka)
-        # odpremo datoteko za pisanje, kamor zapišemo vsebino / besedilo
         with open(path, 'w', encoding='utf-8') as izhodna:
             izhodna.write(besedilo)
+            
         return None
-    # Če funkcija naleti na problem oziroma napako, to pove.
+    
     except OSError:
         print(f"Napaka pri shranjevanju")
+        
         return False
     
- 
+    
+
+def vse_glavne_strani(osnovni_url, zvrsti):
+    '''
+    Funkcija v zanki nalaga nadaljne strani v določeni zvrsti.
+    '''
+    # V zanki "povemo", koliko strani bomo naložili.
+    for i in range(1, 9):
+        text = prevedi_v_niz(osnovni_url + "/" + zvrsti + "/stran-" + str(i) + "/")
+        # primer mape: podatki/roman, primer datoteke: 1.html
+        if text:
+            shrani_v_datoteko(text, "podatki/" + zvrsti, str(i) + ".html")
+
+
+
+def shrani_spletne_strani():
+    '''
+    Funkcija shrani podatke iz spleta in jih shrani v ustrezno datoteko na disku.
+    '''
+    url = "https://beletrina.si"
+    zvrsti = ["roman", "poezija"]
+    for zvrst in zvrsti:
+        vse_glavne_strani(url, zvrst)
+
+     
 
 def izlusci_pot_do_knjig(html):
     """
     Funkcija poišče vse dopolnitve url-ja za dostop do spletnih strani knjig. Le-te shrani v seznam in ga vrne.
     """
-    # napišemo vzorec po katerem najdemo del linka v html datoteki
     naslov_knjige_vzorec = r'<a href="(/knjiga/.+?)" class="'
-    # poiščemo vse pojavitve
+    # Poiščemo vsa ujemanja v besedilu.
     naslov_knjige = re.findall(naslov_knjige_vzorec, html)
+    
     return naslov_knjige
 
 
@@ -63,24 +88,32 @@ def pridobi_podatke_iz_datoteke(datoteka):
     """
     with open(datoteka, "r", encoding='utf-8') as f:
         vsebina = f.read()
+        
         return izlusci_pot_do_knjig(vsebina)
     
 
 
 def vsi_linki_knjig(mapa):
     """
-    Funkcija pridobi vse podatke iz vseh html datotek v mapi.
+    Funkcija pridobi vse podatke iz vseh html datotek v mapi in vrne seznam, kamor jih shranjuje.
     """
     link_knjige = []
     for datoteka in os.listdir(mapa):
+        
         if datoteka.endswith(".html"):
+            # Če se datoteka konča s '.html', potem ustvari polno pot do datoteke.
             pot_do_datoteke = os.path.join(mapa, datoteka)
+            
             try:
+                # V seznam shrani izluščene podatke za datoteko.
                 link_knjige.extend(pridobi_podatke_iz_datoteke(pot_do_datoteke))
+                
             except FileNotFoundError:
                 print(f"Datoteka {pot_do_datoteke} ni najdena.")
+                
             except Exception as e:
                 print(f"Napaka pri obdelavi datoteke {pot_do_datoteke}: {e}")
+                
     return link_knjige
 
 
@@ -100,9 +133,23 @@ def shrani_stran_knjige(url, mapa, ime_datoteke):
 def main():
     url = "https://beletrina.si"
     zvrsti = ["roman", "poezija"]
+    
+    shrani_spletne_strani()
+    
     for zvrst in zvrsti:
-        linki = vsi_linki_knjig(f"podatki/{zvrst}")
+        mapa_poti = f"podatki/{zvrst}"
+        
+        if not os.path.exists(mapa_poti):
+            print(f"Mapa {mapa_poti} ne obstaja.")
+            continue
+        
+        datoteke = os.listdir(mapa_poti)
+        print(f"Najdene datoteke v mapi {mapa_poti}: {datoteke}")
+
+        linki = vsi_linki_knjig(mapa_poti)
+        
         for link in linki:
+            # Sestavimo nov URL za vsako knjigo.
             novi_url = url + link
             print(f"Pridobivam: {novi_url}")
             shrani_stran_knjige(novi_url, f"podatki/{zvrst}/knjige", f"{link.split('/')[-1]}.html")
