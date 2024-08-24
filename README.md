@@ -2,9 +2,9 @@
 
 Avtor: Zala Gregorc
 
-Vsi kdaj pa kdaj radi preberemo kakšno dobro knjigo, še posebej ob morju na plaži. Da bi vedeli, katere knjige se trenutno najbolje prodajajo, kakšna je razlika v ceni med elektronsko knjigo in mehko vezavo, kateri avtorji ponujajo največ knjig in kateri naslovi so najbolj priljubljeni med bralci, sem pripravila analizo le-teh.
+Vsi kdaj pa kdaj radi preberemo kakšno dobro knjigo, še posebej ob morju na plaži. Da bi vedeli, katere knjige so trenutno najbolj 'popularne', kateri avtorji ponujajo največ knjig in kaj zanimivega o njem ter kateri naslovi so najbolj priljubljena izbira med avtorji, sem pripravila analizo le-teh.
 
-V tem projektu bom analizirala knjige, ki jih ponuja ena izmed bolj priljubljenih spletnih knjigaren, [Belentrina] (https://beletrina.si). 
+V tem projektu bom analizirala knjige, ki jih ponuja ena izmed bolj priljubljenih spletnih knjigaren, Belentrina (https://beletrina.si). 
 
 # UPORABA PROGRAMA
 
@@ -29,11 +29,13 @@ Program je v celoti napisan v jeziku python, pri čemer smo uporabili naslednje 
  - knjižnico os, ki omogoča interakcijo z operacijskim sistemom, torej preveri obstoj datotek ali map in jih po potrebi ustvari ali spremeni (v ta namen sem jo jaz uporabila) 
  - knjižnico re; za delo z regularnimi izrazi
  - knjižnica csv; za branje in pisanje datotek v formatu csv (shranjevanje podatkov v obliki tabele)
+ - knjižnica pandas; za branje in pisanje raznih podatkovnih struktur ter branje CSV datotek, uporablja se za analizo
 
 Kako naložiti potrebe knjižnice (za okolje iOS):
 
 """
 pip3 install requests
+pip3 install jupyter
 pip3 install pandas
 pip3 install matplotlib
 """
