@@ -52,12 +52,13 @@ def vse_glavne_strani(osnovni_url, zvrsti):
     '''
     # V zanki "povemo", koliko strani bomo naložili.
     for i in range(1, 9):
-        text = prevedi_v_niz(osnovni_url + "/" + zvrsti + "/stran-" + str(i) + "/")
+        novi_url = osnovni_url + "/knjige/" + zvrsti + "/stran-" + str(i) + "/"
+        besedilo = prevedi_v_niz(novi_url)
         # primer mape: podatki/roman, primer datoteke: 1.html
-        if text:
-            shrani_v_datoteko(text, "podatki/" + zvrsti, str(i) + ".html")
-
-
+        if besedilo:
+            shrani_v_datoteko(besedilo, "podatki/" + zvrsti, f"{i}.html")
+        else:
+            print(f"Strani ni bilo mogoče prenesti: {novi_url}")
 
 def shrani_spletne_strani():
     '''
@@ -69,3 +70,5 @@ def shrani_spletne_strani():
         vse_glavne_strani(url, zvrst)
         
 shrani_spletne_strani()
+
+
