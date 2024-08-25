@@ -1,6 +1,6 @@
-import requests # za pošiljanje zahtevkov in prejemanje odgovorov s spletnih strežnikov 
-import os # za ustvarjanje ali popravljanje map/datotek
-import re # za delo z regularnimi izraze
+import requests 
+import os 
+import re 
 
 
 def prevedi_v_niz(url):
@@ -45,31 +45,7 @@ def shrani_v_datoteko(besedilo, mapa, datoteka):
         return False
     
     
-
-def vse_glavne_strani(osnovni_url, zvrsti):
-    '''
-    Funkcija v zanki nalaga nadaljne strani v določeni zvrsti.
-    '''
-    # V zanki "povemo", koliko strani bomo naložili.
-    for i in range(1, 9):
-        text = prevedi_v_niz(osnovni_url + "/" + zvrsti + "/stran-" + str(i) + "/")
-        # primer mape: podatki/roman, primer datoteke: 1.html
-        if text:
-            shrani_v_datoteko(text, "podatki/" + zvrsti, str(i) + ".html")
-
-
-
-def shrani_spletne_strani():
-    '''
-    Funkcija shrani podatke iz spleta in jih shrani v ustrezno datoteko na disku.
-    '''
-    url = "https://beletrina.si"
-    zvrsti = ["roman", "poezija"]
-    for zvrst in zvrsti:
-        vse_glavne_strani(url, zvrst)
-
-     
-
+    
 def izlusci_pot_do_knjig(html):
     """
     Funkcija poišče vse dopolnitve url-ja za dostop do spletnih strani knjig. Le-te shrani v seznam in ga vrne.
@@ -134,22 +110,9 @@ def main():
     url = "https://beletrina.si"
     zvrsti = ["roman", "poezija"]
     
-    shrani_spletne_strani()
-    
     for zvrst in zvrsti:
-        mapa_poti = f"podatki/{zvrst}"
-        
-        if not os.path.exists(mapa_poti):
-            print(f"Mapa {mapa_poti} ne obstaja.")
-            continue
-        
-        datoteke = os.listdir(mapa_poti)
-        print(f"Najdene datoteke v mapi {mapa_poti}: {datoteke}")
-
-        linki = vsi_linki_knjig(mapa_poti)
-        
+        linki = vsi_linki_knjig(f"podatki/{zvrst}")
         for link in linki:
-            # Sestavimo nov URL za vsako knjigo.
             novi_url = url + link
             print(f"Pridobivam: {novi_url}")
             shrani_stran_knjige(novi_url, f"podatki/{zvrst}/knjige", f"{link.split('/')[-1]}.html")
